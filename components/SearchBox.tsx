@@ -1,4 +1,4 @@
-import {Button, Image, StyleSheet, TextInput, TouchableOpacity, View} from "react-native";
+import { Image, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import {Colors} from "@/constants/Colors";
 
 type SearchBoxProps = {
