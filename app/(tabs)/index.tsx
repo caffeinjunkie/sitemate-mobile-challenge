@@ -1,34 +1,59 @@
-import { Image, StyleSheet } from 'react-native';
-import { useState } from "react";
+import { StyleSheet, ScrollView } from 'react-native';
+import { useState } from 'react';
+import axios from 'axios';
 
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedView } from '@/components/ThemedView';
 import { SearchBox } from "@/components/SearchBox";
+import NewsList from "@/components/NewsList";
 
+import { API_KEY } from '../../config';
 
 export default function HomeScreen() {
-  const [searchValue, setSearchValue] = useState("");
+  const [keyword, setKeyword] = useState('');
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchNews = async () => {
+    setLoading(true);
+    const url = 'https://newsapi.org/v2/everything';
+    const params = {
+      q: keyword,
+      from: '2025-01-01',
+      sortBy: 'publishedAt',
+      apiKey: API_KEY,
+    };
+
+    try {
+      const response = await axios.get(url, { params });
+      setArticles(response.data.articles);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
+    <ScrollView style={styles.scrollView}>
       <ThemedView style={styles.titleContainer}>
-        <SearchBox onSearch={() => {}} onChange={(val: string) => setSearchValue(val)} value={searchValue} />
+        <SearchBox onSearch={() => {
+          keyword.length > 0 && fetchNews()
+        }} onChange={(val: string) => setKeyword(val)} value={keyword} />
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-
+        <NewsList loading={loading} error={error} articles={articles} />
       </ThemedView>
-    </ParallaxScrollView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollView: {
+    paddingHorizontal: 16,
+    paddingTop: 40,
+    backgroundColor: 'white'
+  },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
